@@ -1,0 +1,4 @@
+# Ignore all directories named "data" and their contents
+data/
+zips/
+venv/
