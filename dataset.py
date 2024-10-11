@@ -3,7 +3,9 @@ import requests
 from bs4 import BeautifulSoup
 import os
 import zipfile
+import pandas as pd
 
+#link towards the dataset
 LINK_DATASET = "https://ftp.pride.ebi.ac.uk/pride/data/archive/2017/02/PXD004732/"
 
 def scrape_dataset(url,directory_path,max=None):
@@ -90,5 +92,43 @@ def extract_file_from_zip(directory_path,zip_path,target_file_name="evidence.txt
     return
 
 
-scrape_dataset(LINK_DATASET,"zips",10)
-extract_file_from_zip("data","zips")
+def merge_tabular_files(directory_path, output_file,seperator='\t'):
+    """
+    Merges all tabular files in a specified directory into a single file and saves the result.
+
+    Parameters:
+    -----------
+    directory_path : str
+        The path to the directory containing the tabular files that will be concatenated.
+
+    output_file : str
+        The path where the merged content will be saved. The result will be written to this file.
+
+    separator : str, optional
+        The delimiter used to separate columns in the tabular files. By default, it is set to '\t' (tab-separated).
+        You can change this to other delimiters like ',' for comma-separated files.
+    """
+    # List to store the dataframes from each file
+    all_data = []
+
+    # Loop through each file in the directory
+    for filename in os.listdir(directory_path):
+        file_path = os.path.join(directory_path, filename)
+        print(f"Processing {file_path}...")
+
+        # Read the file into a pandas DataFrame
+        df = pd.read_csv(file_path, sep=seperator)  # Assuming tab-separated values
+        all_data.append(df)
+
+    # Concatenate all the dataframes into one
+    combined_df = pd.concat(all_data, ignore_index=True)
+
+    # Save the combined data to the output file
+    combined_df.to_csv(output_file, sep='\t', index=False)
+
+    print(f"All files have been concatenated into {output_file}.")
+
+
+#scrape_dataset(LINK_DATASET,"zips",3)
+#extract_file_from_zip("data","zips")
+#merge_tabular_files("zips", "evidence_combined")

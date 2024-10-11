@@ -1,0 +1,2 @@
+--updates the requirements.txt file--
+pip freeze > requirements.txt
