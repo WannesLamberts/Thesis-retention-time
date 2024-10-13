@@ -178,9 +178,18 @@ def write_dataframe_to_file(df, output_path, separator='\t'):
     except Exception as e:
         print(f"An error occurred while writing the DataFrame to CSV: {e}")
 
-scrape_dataset(LINK_DATASET,"zips",1)
-extract_file_from_zip("data","zips")
-merge_tabular_files("data", "evidence_combined.tsv")
+#scrape_dataset(LINK_DATASET,"zips",1)
+#extract_file_from_zip("data","zips")
+#merge_tabular_files("data", "evidence_combined.tsv")
 df = load_dataframe("evidence_combined.tsv",["Modified sequence","Retention time","Score","Experiment"])
+
 write_dataframe_to_file(df,"simple_dataframe.tsv")
+print("--HEAD--")
 print(df.head())
+print("--INFO--")
+print(df.info())
+print("--DUPLICATES--")
+for column in df.columns:
+    print(f"{column }: {df[column].duplicated().sum()}")
+print("--DESCRIBE--")
+print(df.describe())
