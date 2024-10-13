@@ -156,8 +156,31 @@ def load_dataframe(path_csv,columns=None,seperator='\t'):
         df = df[columns]
     return df
 
-#scrape_dataset(LINK_DATASET,"zips",1)
-#extract_file_from_zip("data","zips")
-#merge_tabular_files("data", "evidence_combined.csv")
-df = load_dataframe("evidence_combined.csv",["Modified sequence","Retention time","Score","Experiment"])
+def write_dataframe_to_file(df, output_path, separator='\t'):
+    """
+    Writes a pandas DataFrame to a CSV file with an optional custom separator.
+
+    Parameters:
+    -----------
+    df : pandas.DataFrame
+        The DataFrame that needs to be written to the CSV file.
+
+    output_path : str
+        The file path where the CSV file will be saved.
+
+    separator : str, optional
+        The delimiter used to separate values in the CSV file. By default, it is set to '\t' (tab-separated values).
+        You can specify other delimiters such as ',' for comma-separated files.
+    """
+    try:
+        df.to_csv(output_path, index=False, sep=separator)
+        print(f"DataFrame successfully written to {output_path} with separator '{separator}'")
+    except Exception as e:
+        print(f"An error occurred while writing the DataFrame to CSV: {e}")
+
+scrape_dataset(LINK_DATASET,"zips",1)
+extract_file_from_zip("data","zips")
+merge_tabular_files("data", "evidence_combined.tsv")
+df = load_dataframe("evidence_combined.tsv",["Modified sequence","Retention time","Score","Experiment"])
+write_dataframe_to_file(df,"simple_dataframe.tsv")
 print(df.head())
