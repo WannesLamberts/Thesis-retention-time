@@ -129,6 +129,35 @@ def merge_tabular_files(directory_path, output_file,seperator='\t'):
     print(f"All files have been concatenated into {output_file}.")
 
 
-#scrape_dataset(LINK_DATASET,"zips",3)
+def load_dataframe(path_csv,columns=None,seperator='\t'):
+    """
+    Loads a CSV file into a pandas DataFrame, with an option to keep only selected columns.
+
+    Parameters:
+    -----------
+    path_csv : str
+        The path to the CSV file that needs to be loaded.
+
+    columns : list, optional
+        A list of column names to retain in the DataFrame. If not provided, all columns will be loaded.
+        This allows you to select specific columns of interest from the dataset.
+
+    separator : str, optional
+        The delimiter used to separate values in the CSV file. By default, it is set to '\t' (tab-separated values).
+        You can specify other delimiters such as ',' for comma-separated files.
+
+    Returns:
+    --------
+    pandas.DataFrame
+        A pandas DataFrame containing the loaded data, with the specified columns if provided.
+    """
+    df = pd.read_csv(path_csv, sep=seperator)
+    if columns:
+        df = df[columns]
+    return df
+
+#scrape_dataset(LINK_DATASET,"zips",1)
 #extract_file_from_zip("data","zips")
-#merge_tabular_files("zips", "evidence_combined")
+#merge_tabular_files("data", "evidence_combined.csv")
+df = load_dataframe("evidence_combined.csv",["Modified sequence","Retention time","Score","Experiment"])
+print(df.head())
