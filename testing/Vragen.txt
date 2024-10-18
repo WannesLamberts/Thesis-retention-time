@@ -1,0 +1,4 @@
+Reference peptides met database hoe?
+preprocessen en dan nieuwe data opslaan? of telkens niet opslaan zodat variabel is
+Modified sequence of modified_sequence gewoon in algemeen hoe naam kolommen
+preprocess_dataframe wat is beter copy nemen zodat origineel niet aangepast wordt of orgigineel aanpassen?
