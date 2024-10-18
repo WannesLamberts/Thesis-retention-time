@@ -203,6 +203,49 @@ def preprocess_dataframe(df,format_modified_sequence = True,min_score = 90, max_
 
     return df
 
+
+def preprocess_directory(target_dir_path,output_dir_path,columns = ["Modified sequence","Retention time","Score","PEP","Experiment"],format_modified_sequence = True,min_score = 90, max_PEP = 0.01,reset_index = True):
+    """
+    Preprocesses all CSV files in the specified directory by filtering and formatting their contents.
+    The processed files are written to the specified output directory.
+
+    Parameters:
+    -----------
+    target_dir_path : str
+        The path to the directory containing the CSV files to be processed.
+
+    output_dir_path : str
+        The path to the directory where the processed files will be saved. If the directory
+        does not exist, it will be created.
+
+    columns : list, optional
+        A list of column names to retain in each file. The default columns are:
+        "Modified sequence", "Retention time", "Score", "PEP", and "Experiment".
+
+    format_modified_sequence : bool, optional
+        If True, applies a specific formatting function to the "Modified sequence" column.
+        Default is True.
+
+    min_score : float, optional
+        The minimum score threshold for filtering rows. Only rows with a score greater than or
+        equal to this value will be retained. Default is 90.
+
+    max_PEP : float, optional
+        The maximum Posterior Error Probability (PEP) threshold for filtering rows. Only rows with
+        a PEP less than or equal to this value will be retained. Default is 0.01.
+
+    reset_index : bool, optional
+        If True, resets the index of the DataFrame after filtering. Default is True.
+
+    """
+    os.makedirs(output_dir_path, exist_ok=True)
+    for filename in os.listdir(target_dir_path):
+        path = os.path.join(target_dir_path,filename)
+        df = load_dataframe(path,columns)
+        df = preprocess_dataframe(df,format_modified_sequence,min_score,max_PEP,reset_index)
+        output_path = os.path.join(output_dir_path,filename)
+        write_dataframe_to_file(df,output_path)
+
 def write_dataframe_to_file(df, output_path, separator='\t'):
     """
     Writes a pandas DataFrame to a CSV file with an optional custom separator.
@@ -393,15 +436,16 @@ def calibrate_to_iRT(df,calibration_df=None,seq_col="Modified sequence",rt_col="
     return df
 
 
+
 #scrape_dataset(LINK_DATASET,"zips")
 #extract_file_from_zip("data","zips")
 #merge_tabular_files("data", "evidence_combined.tsv")
 #df = load_dataframe("evidence_combined.tsv",["Modified sequence","Retention time","Score","Experiment"])
 #write_dataframe_to_file(df,"simple_dataframe.tsv")
 #sort_evidence_files("data")
-df = load_dataframe("testing/data_small/Pool_2/Thermo_SRM_Pool_2_01_01_2xIT_2xHCD-1h-R2-tryptic-evidence.txt",["Modified sequence","Retention time","Score","PEP","Experiment"])
-print(df["Retention time"].head())
-df = preprocess_dataframe(df)
-df= calibrate_to_iRT(df,plot = False)
-print(df[["Retention time","iRT"]].head())
-
+#df = load_dataframe("testing/data_small/Pool_2/Thermo_SRM_Pool_2_01_01_2xIT_2xHCD-1h-R2-tryptic-evidence.txt",["Modified sequence","Retention time","Score","PEP","Experiment"])
+#print(df["Retention time"].head())
+#df = preprocess_dataframe(df)
+#df= calibrate_to_iRT(df,plot = False)
+#print(df[["Retention time","iRT"]].head())
+#preprocess_directory(r"D:\data_Original", "processed")
