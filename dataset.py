@@ -134,21 +134,21 @@ def merge_tabular_files(directory_path, output_file,seperator='\t'):
     print(f"All files have been concatenated into {output_file}.")
 
 
-def load_dataframe(path_csv,columns=None,seperator='\t'):
+def load_dataframe(path,columns=None,seperator='\t'):
     """
-    Loads a CSV file into a pandas DataFrame, with an option to keep only selected columns.
+    Loads a file into a pandas DataFrame, with an option to keep only selected columns.
 
     Parameters:
     -----------
-    path_csv : str
-        The path to the CSV file that needs to be loaded.
+    path : str
+        The path to the file that needs to be loaded.
 
     columns : list, optional
         A list of column names to retain in the DataFrame. If not provided, all columns will be loaded.
         This allows you to select specific columns of interest from the dataset.
 
     separator : str, optional
-        The delimiter used to separate values in the CSV file. By default, it is set to '\t' (tab-separated values).
+        The delimiter used to separate values in the file. By default, it is set to '\t' (tab-separated values).
         You can specify other delimiters such as ',' for comma-separated files.
 
     Returns:
@@ -156,7 +156,7 @@ def load_dataframe(path_csv,columns=None,seperator='\t'):
     pandas.DataFrame
         A pandas DataFrame containing the loaded data, with the specified columns if provided.
     """
-    df = pd.read_csv(path_csv, sep=seperator)
+    df = pd.read_csv(path, sep=seperator)
     if columns:
         df = df[columns]
     return df
@@ -204,9 +204,10 @@ def preprocess_dataframe(df,format_modified_sequence = True,min_score = 90, max_
     return df
 
 
-def preprocess_directory(target_dir_path,output_dir_path,columns = ["Modified sequence","Retention time","Score","PEP","Experiment"],format_modified_sequence = True,min_score = 90, max_PEP = 0.01,reset_index = True,separator='\t'):
+def preprocess_directory(target_dir_path,output_dir_path,columns = ["Modified sequence","Retention time","Score","PEP","Experiment"],format_modified_sequence = True,
+                         min_score = 90, max_PEP = 0.01,reset_index = True,separator='\t',calibrate = True,sort = True):
     """
-    Preprocesses all CSV files in the specified directory by filtering and formatting their contents.
+    Preprocesses all files in the specified directory by filtering and formatting their contents.
     The processed files are written to the specified output directory.
 
     Parameters:
@@ -240,7 +241,16 @@ def preprocess_directory(target_dir_path,output_dir_path,columns = ["Modified se
     separator : str, optional
         The delimiter used to separate values in the file. By default, it is set to '\t' (tab-separated values).
         You can specify other delimiters such as ',' for comma-separated files.
+
+    calibrate : bool, optional
+        If True, calibrates the retention times and adds a column that holds the iRT values.
+        Default is True.
+
+    sort : bool, optional
+        If True, sorts the processed evidence files after processing into their pools. Default is True.
     """
+
+    # Ensure the output directory exists. If it doesn't, it will be created.
     os.makedirs(output_dir_path, exist_ok=True)
     for filename in os.listdir(target_dir_path):
         path = os.path.join(target_dir_path,filename)
@@ -248,13 +258,21 @@ def preprocess_directory(target_dir_path,output_dir_path,columns = ["Modified se
 
         #preprocess dataframe
         df = preprocess_dataframe(df,format_modified_sequence,min_score,max_PEP,reset_index)
-        output_path = os.path.join(output_dir_path,filename)
 
+        if calibrate:
+            #calibrates the retention times
+            df= calibrate_to_iRT(df)
+
+        output_path = os.path.join(output_dir_path,filename)
         write_dataframe_to_file(df,output_path,separator)
+
+    if sort:
+        #sorts the files in their respective pools
+        sort_evidence_files(output_dir_path)
 
 def write_dataframe_to_file(df, output_path, separator='\t'):
     """
-    Writes a pandas DataFrame to a CSV file with an optional custom separator.
+    Writes a pandas DataFrame to a file with an optional custom separator.
 
     Parameters:
     -----------
@@ -262,7 +280,7 @@ def write_dataframe_to_file(df, output_path, separator='\t'):
         The DataFrame that needs to be written to the file.
 
     output_path : str
-        The file path where the CSV file will be saved.
+        The file path where the file will be saved.
 
     separator : str, optional
         The delimiter used to separate values in the file. By default, it is set to '\t' (tab-separated values).
@@ -272,7 +290,7 @@ def write_dataframe_to_file(df, output_path, separator='\t'):
         df.to_csv(output_path, index=False, sep=separator)
         print(f"DataFrame successfully written to {output_path} with separator '{separator}'")
     except Exception as e:
-        print(f"An error occurred while writing the DataFrame to CSV: {e}")
+        print(f"An error occurred while writing the DataFrame to file: {e}")
 
 def sort_evidence_files(location):
     """
@@ -454,5 +472,5 @@ def calibrate_to_iRT(df,calibration_df=None,seq_col="Modified sequence",rt_col="
 #df = preprocess_dataframe(df)
 #df= calibrate_to_iRT(df,plot = False)
 #print(df[["Retention time","iRT"]].head())
-#preprocess_directory(r"D:\data_Original", "processed")
+preprocess_directory(r"D:\data_Original", "preprocessed_data")
 #sort_evidence_files("processed")
