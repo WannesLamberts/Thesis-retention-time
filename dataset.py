@@ -204,7 +204,7 @@ def preprocess_dataframe(df,format_modified_sequence = True,min_score = 90, max_
     return df
 
 
-def preprocess_directory(target_dir_path,output_dir_path,columns = ["Modified sequence","Retention time","Score","PEP","Experiment"],format_modified_sequence = True,min_score = 90, max_PEP = 0.01,reset_index = True):
+def preprocess_directory(target_dir_path,output_dir_path,columns = ["Modified sequence","Retention time","Score","PEP","Experiment"],format_modified_sequence = True,min_score = 90, max_PEP = 0.01,reset_index = True,separator='\t'):
     """
     Preprocesses all CSV files in the specified directory by filtering and formatting their contents.
     The processed files are written to the specified output directory.
@@ -212,7 +212,7 @@ def preprocess_directory(target_dir_path,output_dir_path,columns = ["Modified se
     Parameters:
     -----------
     target_dir_path : str
-        The path to the directory containing the CSV files to be processed.
+        The path to the directory containing the tsv files to be processed.
 
     output_dir_path : str
         The path to the directory where the processed files will be saved. If the directory
@@ -237,14 +237,20 @@ def preprocess_directory(target_dir_path,output_dir_path,columns = ["Modified se
     reset_index : bool, optional
         If True, resets the index of the DataFrame after filtering. Default is True.
 
+    separator : str, optional
+        The delimiter used to separate values in the file. By default, it is set to '\t' (tab-separated values).
+        You can specify other delimiters such as ',' for comma-separated files.
     """
     os.makedirs(output_dir_path, exist_ok=True)
     for filename in os.listdir(target_dir_path):
         path = os.path.join(target_dir_path,filename)
-        df = load_dataframe(path,columns)
+        df = load_dataframe(path,columns,separator)
+
+        #preprocess dataframe
         df = preprocess_dataframe(df,format_modified_sequence,min_score,max_PEP,reset_index)
         output_path = os.path.join(output_dir_path,filename)
-        write_dataframe_to_file(df,output_path)
+
+        write_dataframe_to_file(df,output_path,separator)
 
 def write_dataframe_to_file(df, output_path, separator='\t'):
     """
@@ -253,13 +259,13 @@ def write_dataframe_to_file(df, output_path, separator='\t'):
     Parameters:
     -----------
     df : pandas.DataFrame
-        The DataFrame that needs to be written to the CSV file.
+        The DataFrame that needs to be written to the file.
 
     output_path : str
         The file path where the CSV file will be saved.
 
     separator : str, optional
-        The delimiter used to separate values in the CSV file. By default, it is set to '\t' (tab-separated values).
+        The delimiter used to separate values in the file. By default, it is set to '\t' (tab-separated values).
         You can specify other delimiters such as ',' for comma-separated files.
     """
     try:
@@ -449,3 +455,4 @@ def calibrate_to_iRT(df,calibration_df=None,seq_col="Modified sequence",rt_col="
 #df= calibrate_to_iRT(df,plot = False)
 #print(df[["Retention time","iRT"]].head())
 #preprocess_directory(r"D:\data_Original", "processed")
+#sort_evidence_files("processed")
