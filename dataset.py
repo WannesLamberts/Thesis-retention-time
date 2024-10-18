@@ -1,13 +1,14 @@
 
-import requests
-from bs4 import BeautifulSoup
-import os
-import zipfile
-import pandas as pd
-import re
-import shutil
-import numpy as np
-from sklearn import linear_model
+import requests  # Used for making HTTP requests to retrieve data from web pages or APIs
+from bs4 import BeautifulSoup  # Used for parsing HTML and XML documents, especially for web scraping
+import os  # Provides a way of interacting with the operating system, such as file and directory manipulation
+import zipfile  # Used for working with zip archives, including creating, extracting, and reading zip files
+import pandas as pd  # Provides powerful data structures and data analysis tools, especially for working with data in tabular format (DataFrames)
+import re  # Provides regular expression matching operations for working with strings
+import shutil  # Used for high-level file operations, such as copying, moving, and removing files and directories
+import numpy as np  # Provides support for large, multi-dimensional arrays and matrices, along with mathematical functions to operate on these arrays
+from sklearn import linear_model  # Part of the scikit-learn library, used for implementing linear regression models and other machine learning algorithms
+import matplotlib.pyplot as plt  # A plotting library used for creating static, animated, and interactive visualizations in Python
 
 #link towards the dataset
 LINK_DATASET = "https://ftp.pride.ebi.ac.uk/pride/data/archive/2017/02/PXD004732/"
@@ -398,7 +399,9 @@ def calibrate_to_iRT(df,calibration_df=None,seq_col="Modified sequence",rt_col="
 #df = load_dataframe("evidence_combined.tsv",["Modified sequence","Retention time","Score","Experiment"])
 #write_dataframe_to_file(df,"simple_dataframe.tsv")
 #sort_evidence_files("data")
-df = load_dataframe("data/Pool_2/Thermo_SRM_Pool_2_01_01_2xIT_2xHCD-1h-R2-tryptic-evidence.txt",["Modified sequence","Retention time","Score","PEP","Experiment"])
+df = load_dataframe("testing/data_small/Pool_2/Thermo_SRM_Pool_2_01_01_2xIT_2xHCD-1h-R2-tryptic-evidence.txt",["Modified sequence","Retention time","Score","PEP","Experiment"])
+print(df["Retention time"].head())
 df = preprocess_dataframe(df)
-df= calibrate_to_iRT(df)
+df= calibrate_to_iRT(df,plot = False)
+print(df[["Retention time","iRT"]].head())
 
