@@ -262,9 +262,14 @@ def preprocess_directory(target_dir_path,output_dir_path,columns = ["Modified se
         if calibrate:
             #calibrates the retention times
             df= calibrate_to_iRT(df)
+            #Check if calibration worked correctly
+            if df is None:
+                print(f"Not enough calibration peptides found in {filename}")
 
-        output_path = os.path.join(output_dir_path,filename)
-        write_dataframe_to_file(df,output_path,separator)
+        if df is not None:
+            #If everything went well write the dataframe to file
+            output_path = os.path.join(output_dir_path, filename)
+            write_dataframe_to_file(df,output_path,separator)
 
     if sort:
         #sorts the files in their respective pools
@@ -288,9 +293,10 @@ def write_dataframe_to_file(df, output_path, separator='\t'):
     """
     try:
         df.to_csv(output_path, index=False, sep=separator)
-        print(f"DataFrame successfully written to {output_path} with separator '{separator}'")
+        #print(f"DataFrame successfully written to {output_path} with separator '{separator}'")
     except Exception as e:
-        print(f"An error occurred while writing the DataFrame to file: {e}")
+        pass
+        #print(f"An error occurred while writing the DataFrame to file: {output_path}")
 
 def sort_evidence_files(location):
     """
@@ -461,16 +467,6 @@ def calibrate_to_iRT(df,calibration_df=None,seq_col="Modified sequence",rt_col="
 
 
 
-#scrape_dataset(LINK_DATASET,"zips")
-#extract_file_from_zip("data","zips")
-#merge_tabular_files("data", "evidence_combined.tsv")
-#df = load_dataframe("evidence_combined.tsv",["Modified sequence","Retention time","Score","Experiment"])
-#write_dataframe_to_file(df,"simple_dataframe.tsv")
-#sort_evidence_files("data")
-#df = load_dataframe("testing/data_small/Pool_2/Thermo_SRM_Pool_2_01_01_2xIT_2xHCD-1h-R2-tryptic-evidence.txt",["Modified sequence","Retention time","Score","PEP","Experiment"])
-#print(df["Retention time"].head())
-#df = preprocess_dataframe(df)
-#df= calibrate_to_iRT(df,plot = False)
-#print(df[["Retention time","iRT"]].head())
-preprocess_directory(r"D:\data_Original", "preprocessed_data")
-#sort_evidence_files("processed")
+#scrape_dataset(LINK_DATASET,r"D:\zips")
+#extract_file_from_zip(r"D:\data_original",r"D:\zips")
+#preprocess_directory(r"D:\data_original", r"D:\data_preprocessed")
