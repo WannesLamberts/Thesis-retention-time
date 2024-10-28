@@ -1,0 +1,7 @@
+-Peptides selecteren dat in veel pools zitten
+- Voor elke peptide chart maken intensity/RT
+- elk retentietijd punt aanduiden annoteren met file
+- elke retentietijd kleur geven aan de hand van pool
+- Kijken of boogje tussen verschillende pools verschilt. unimodal, bimodal,multimodal.
+
+Zie foto
