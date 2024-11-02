@@ -96,7 +96,7 @@ def extract_file_from_zip(directory_path,zip_path,target_file_name="evidence.txt
     print("All 'evidence' files have been extracted.")
     return
 
-def merge_files(directory_path,output):
+def merge_files(directory_path,output,experiment=True):
     pools = []
     for pool_dir in os.listdir(directory_path):
         pool_path = os.path.join(directory_path, pool_dir)
@@ -110,8 +110,8 @@ def merge_files(directory_path,output):
                 pools.append(df_file)
 
     dataframe_pools = pd.concat(pools, ignore_index=True).reset_index(drop=True)
-    dataframe_pools = dataframe_pools.drop(columns=['Experiment'])
-
+    if not experiment:
+        dataframe_pools = dataframe_pools.drop(columns=['Experiment'])
     # If an output path is specified, save the dataframe as a tab-separated file
     dataframe_pools.to_csv(output, sep='\t', index=False)
     print(f"Data saved to {output} as a tab-separated file")
@@ -489,5 +489,5 @@ def calibrate_to_iRT(df,calibration_df=None,seq_col="Modified sequence",rt_col="
 #scrape_dataset(LINK_DATASET,r"D:\zips")
 #extract_file_from_zip(r"D:\data_original",r"D:\zips")
 #preprocess_directory(r"D:\data_original", r"D:\data_preprocessed")
-#merge_files(r"D:\data_preprocessed",r"D:\merged.txt")
-#merge_files("testing/data_small","testing/data_small_merged")
+#merge_files(r"D:\data_preprocessed",r"D:\merged_experiment.txt")
+merge_files("testing/data_small","testing/data_small_merged_experiment")
