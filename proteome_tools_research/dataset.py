@@ -490,4 +490,4 @@ def calibrate_to_iRT(df,calibration_df=None,seq_col="Modified sequence",rt_col="
 #extract_file_from_zip(r"D:\data_original",r"D:\zips")
 #preprocess_directory(r"D:\data_original", r"D:\data_preprocessed")
 #merge_files(r"D:\data_preprocessed",r"D:\merged_experiment.txt")
-merge_files("testing/data_small","testing/data_small_merged_experiment")
+# merge_files("testing/data_small","testing/data_small_merged_experiment")
