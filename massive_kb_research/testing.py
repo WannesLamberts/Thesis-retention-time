@@ -1,14 +1,15 @@
 from utils.preprocess import *
-
-
-merge_psm_files("test_data/first_two", "output/out.tsv")
+# calibrate_to_iRT('test_data/first_two_extended','test_data/first_two_extended_calibrated',chronologer)
+merge_psm_files("test_data/first_two_extended", "output/out.tsv")
 
 df = load_dataframe('output/out.tsv')
+df.columns = ['filename', 'scan', 'RT', 'PeptideModSeq', 'mztab_filename', 'task_id']
+
 grouped = df.groupby('filename')
 chronologer = load_dataframe("datasets/chronologer.tsv")
-
-
-calibration_peptides_base = get_calibration_peptides(df)
+#
+#
+# calibration_peptides_base = get_calibration_peptides(df)
 calibration_peptides_chronologer = get_calibration_peptides(df,chronologer)
 
 # print(len(calibration_peptides_chronologer))
@@ -22,7 +23,7 @@ calibration_peptides_chronologer = get_calibration_peptides(df,chronologer)
 
 df2 = grouped.apply(lambda group: calibrate_to_iRT(group, chronologer, 'PeptideModSeq','RT'),include_groups=False).reset_index()
 df2 = df2.drop(columns='level_1')
-write_dataframe_to_file(df2,"output/calibrated.tsv")
+write_dataframe_to_file(df2,"output/calibratedO1.tsv")
 print(len(df))
 print(len(df2))
 print(df.columns)

@@ -1,13 +1,18 @@
+import multiprocessing
 import os
+import sys
+import time
 
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 from sklearn import linear_model
 
-def load_dataframe(path,columns=None,seperator='\t'):
+
+def load_dataframe(path, columns=None,has_header=True,separator='\t'):
     """
-    Loads a file into a pandas DataFrame, with an option to keep only selected columns.
+    Loads a file into a pandas DataFrame with an option to keep only selected columns,
+    and allows you to choose if the file contains headers.
 
     Parameters:
     -----------
@@ -15,25 +20,33 @@ def load_dataframe(path,columns=None,seperator='\t'):
         The path to the file that needs to be loaded.
 
     columns : list, optional
-        A list of column names to retain in the DataFrame. If not provided, all columns will be loaded.
-        This allows you to select specific columns of interest from the dataset.
+        A list of column names to set if the dataframe doesn't have a header.
+        Only used when `has_header=False`.
 
     separator : str, optional
         The delimiter used to separate values in the file. By default, it is set to '\t' (tab-separated values).
         You can specify other delimiters such as ',' for comma-separated files.
+
+    has_header : bool, optional
+        Whether the file contains header information. Default is `True`.
 
     Returns:
     --------
     pandas.DataFrame
         A pandas DataFrame containing the loaded data, with the specified columns if provided.
     """
-    df = pd.read_csv(path, sep=seperator)
-    if columns:
-        df = df[columns]
+
+    if has_header:
+        df = pd.read_csv(path, sep=separator)
+    else:
+        if columns is None:
+            raise ValueError("If `has_header` is False, you must provide column names using the 'columns' parameter.")
+        # Read the file without headers, use the provided column names
+        df = pd.read_csv(path, sep=separator, header=None, names=columns)
+
     return df
 
-
-def merge_psm_files(directory, out_file,header = ['filename','scan','RT','PeptideModSeq']):
+def merge_psm_files(directory, out_file,header = ['filename','scan','RT','sequence','mztab_filename','task_id']):
     """
     Merges all tsv files containing psms in the given directory in one tsv file
 
@@ -59,6 +72,19 @@ def merge_psm_files(directory, out_file,header = ['filename','scan','RT','Peptid
                 outfile.write(infile.read())
 
     print(f"All TSV files have been merged into {out_file}")
+
+
+
+def check_overlap(df, cal_peptides):
+    """
+    checks the amount of overlap there is from df with dict
+
+    """
+    group_values = set(df["PeptideModSeq"])
+    overlap = group_values.intersection(cal_peptides)
+    return len(overlap)
+
+
 
 def get_calibration_peptides(df, calibration_df=None):
     """
@@ -102,17 +128,6 @@ def get_calibration_peptides(df, calibration_df=None):
         return {
             k: v for k, v in zip(overlap["PeptideModSeq"], overlap["Prosit_RT"])
         }
-
-def check_overlap(df, cal_peptides):
-    """
-    checks the amount of overlap there is from df with dict
-
-    """
-
-    group_values = set(df["PeptideModSeq"])
-    overlap = group_values.intersection(cal_peptides)
-    return len(overlap)
-
 
 def calibrate_to_iRT(df,calibration_df=None,seq_col="Modified sequence",rt_col="Retention time",
     irt_col="iRT",plot=False,filename=None,take_median=False,):
@@ -188,6 +203,7 @@ def calibrate_to_iRT(df,calibration_df=None,seq_col="Modified sequence",rt_col="
         )
     # If fewer than two calibration peptides are found, return None (unable to perform calibration)
     if len(old_rt) < 2:
+        print("NOT ENOUGH CAL PEPTIDES FOUND")
         return None
 
     # Fit a linear regression model using the original RT values and the iRT values
@@ -213,6 +229,71 @@ def calibrate_to_iRT(df,calibration_df=None,seq_col="Modified sequence",rt_col="
         plt.show()
 
     return df
+
+
+def process_file(file,directory, out_dir, calibration_df):
+    """
+    calibrates the file in the directory.
+    the file holds a dataframe which has a column filename.
+    The calibrating will be run on each filename.
+
+    Parameters:
+    -----------
+    file : string
+        The name of the tsv file to be calibrated
+    directory : string
+        The name of the directory containing the tsv files.
+
+    out_dir : string
+        The name of the directory where the calibration results will be saved.
+
+    calibration_df : pandas.DataFrame
+        The dataframe which will be used as reference for the calibration.
+
+    """
+    print(f'started {file}')
+    file_path = os.path.join(directory, file)
+    df = load_dataframe(file_path,['filename','scan','RT','PeptideModSeq','mztab_filename','task_id'],False)
+
+    calibrated_df = df.groupby('filename').apply(
+        lambda group: calibrate_to_iRT(group, calibration_df, 'PeptideModSeq', 'RT'),
+        include_groups=False
+    ).reset_index()
+
+    output_file_path = os.path.join(out_dir, file)
+    calibrated_df.to_csv(output_file_path, sep='\t', index=False)
+    print(f'Calibrated {file}')
+
+
+def calibrate_directory(directory, out_dir,calibration_df):
+    """
+    Calibrates the retention time of each tsv file in the directory.
+
+
+    Parameters:
+    -----------
+    directory : string
+        The name of the directory containing the tsv files.
+
+    out_dir : string
+        The name of the directory where the calibration results will be saved.
+
+    calibration_df : pandas.DataFrame
+        The dataframe which will be used as reference for the calibration.
+
+    """
+    if not os.path.exists(out_dir):
+        os.makedirs(out_dir)
+
+    files = sorted(
+        [f for f in os.listdir(directory) if f.endswith(".tsv") and os.path.isfile(os.path.join(directory, f))])
+
+    # for file in files:
+    #     process_file(file, directory, out_dir, calibration_df)
+    with multiprocessing.Pool(processes=2) as pool:
+        pool.starmap(process_file, [(file, directory, out_dir, calibration_df) for file in files])
+
+
 
 
 def write_dataframe_to_file(df, output_path, separator='\t'):
