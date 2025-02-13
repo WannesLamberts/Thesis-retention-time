@@ -261,7 +261,7 @@ def process_file(file,directory, out_dir, calibration_df):
     ).reset_index()
 
     output_file_path = os.path.join(out_dir, file)
-    calibrated_df.to_csv(output_file_path, sep='\t', index=False)
+    calibrated_df.to_csv(output_file_path, sep='\t', index=False,header=False)
     print(f'Calibrated {file}')
 
 
@@ -290,7 +290,7 @@ def calibrate_directory(directory, out_dir,calibration_df):
 
     # for file in files:
     #     process_file(file, directory, out_dir, calibration_df)
-    with multiprocessing.Pool(processes=2) as pool:
+    with multiprocessing.Pool(processes=19) as pool:
         pool.starmap(process_file, [(file, directory, out_dir, calibration_df) for file in files])
 
 
