@@ -258,7 +258,7 @@ def process_file(file,directory, out_dir, calibration_df):
         lambda group: calibrate_to_iRT(group, calibration_df, 'PeptideModSeq', 'RT'),
         include_groups=False
     ).reset_index()
-    #calibrated_df = calibrated_df.drop('level 1', axis=1)
+    calibrated_df = calibrated_df.drop('level 1', axis=1)
     output_file_path = os.path.join(out_dir, file)
     calibrated_df.to_csv(output_file_path, sep='\t', index=False,header=False)
     print(f'Calibrated {file}')
@@ -289,7 +289,8 @@ def calibrate_directory(directory, out_dir,calibration_df):
 
     # for file in files:
     #     process_file(file, directory, out_dir, calibration_df)
-    with multiprocessing.Pool(processes=10) as pool:
+    num_processes =multiprocessing.cpu_count()-1
+    with multiprocessing.Pool(processes=num_processes) as pool:
         pool.starmap(process_file, [(file, directory, out_dir, calibration_df) for file in files])
 
 
