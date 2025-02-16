@@ -12,4 +12,4 @@ module load SciPy-bundle/2024.05-gfbf-2024a
 module load scikit-learn/1.5.2-gfbf-2024a
 module load matplotlib/3.9.2-gfbf-2024a
 
-./main.py "${VSC_DATA}/results/psms" "${VSC_DATA}/results_calibrated"
+./main.py "${VSC_SCRATCH}/results/psms" "${VSC_DATA}/results_calibrated"
