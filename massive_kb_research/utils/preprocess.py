@@ -253,13 +253,13 @@ def process_file(file,directory, out_dir, calibration_df):
     """
     print(f'started {file}')
     file_path = os.path.join(directory, file)
-    df = load_dataframe(file_path,['filename','scan','RT','PeptideModSeq','mztab_filename','task_id'],False)
+    df = load_dataframe(file_path,['filename','scan','RT','PeptideModSeq','task_id'],False)
 
     calibrated_df = df.groupby('filename').apply(
         lambda group: calibrate_to_iRT(group, calibration_df, 'PeptideModSeq', 'RT'),
         include_groups=False
     ).reset_index()
-
+    #calibrated_df = calibrated_df.drop('level 1', axis=1)
     output_file_path = os.path.join(out_dir, file)
     calibrated_df.to_csv(output_file_path, sep='\t', index=False,header=False)
     print(f'Calibrated {file}')
@@ -290,7 +290,7 @@ def calibrate_directory(directory, out_dir,calibration_df):
 
     # for file in files:
     #     process_file(file, directory, out_dir, calibration_df)
-    with multiprocessing.Pool(processes=19) as pool:
+    with multiprocessing.Pool(processes=10) as pool:
         pool.starmap(process_file, [(file, directory, out_dir, calibration_df) for file in files])
 
 
