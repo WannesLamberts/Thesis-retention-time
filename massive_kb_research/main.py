@@ -6,5 +6,6 @@ import multiprocessing
 if __name__ == '__main__':
     psms_path = sys.argv[1]
     output_path = sys.argv[2]
-    chronologer = load_dataframe("datasets/chronologer.tsv")
+    chronologer_loc = sys.argv[3]
+    chronologer = load_dataframe(chronologer_loc)
     calibrate_directory(psms_path, output_path, chronologer)
