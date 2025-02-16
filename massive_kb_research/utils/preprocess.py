@@ -289,9 +289,9 @@ def calibrate_directory(directory, out_dir,calibration_df):
 
     # for file in files:
     #     process_file(file, directory, out_dir, calibration_df)
-    num_processes =multiprocessing.cpu_count()-1
+    num_processes =49
     print(num_processes)
-    with multiprocessing.Pool(processes=10) as pool:
+    with multiprocessing.Pool(processes=num_processes) as pool:
         pool.starmap(process_file, [(file, directory, out_dir, calibration_df) for file in files])
     ##
 
