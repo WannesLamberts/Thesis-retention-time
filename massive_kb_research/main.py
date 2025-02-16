@@ -8,4 +8,3 @@ if __name__ == '__main__':
     output_path = sys.argv[2]
     chronologer = load_dataframe("datasets/chronologer.tsv")
     calibrate_directory(psms_path, output_path, chronologer)
-    print("test")
