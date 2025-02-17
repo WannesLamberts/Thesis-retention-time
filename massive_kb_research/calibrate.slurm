@@ -13,4 +13,4 @@ module load scikit-learn/1.5.2-gfbf-2024a
 module load matplotlib/3.9.2-gfbf-2024a
 
 chmod +x main.py
-./main.py "${VSC_SCRATCH}/results/psms" "${VSC_DATA}/results_calibrated" "${VSC_DATA}/Chronologer.tsv"
+python3 main.py "${VSC_SCRATCH}/results/psms" "${VSC_DATA}/results_calibrated" "${VSC_SCRATCH}/Chronologer.tsv"
